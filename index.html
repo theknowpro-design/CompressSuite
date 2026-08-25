@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CompressSuite</title>
+  </head>
+  <body data-theme="light">
+    <script>
+      try {
+        var theme = localStorage.getItem("compresssuite-theme");
+        if (theme === "dark" || theme === "light") {
+          document.body.setAttribute("data-theme", theme);
+        }
+      } catch (e) {}
+    </script>
+    <div id="root"></div>
+    <script type="module" src="/src/index.jsx"></script>
+  </body>
+</html>

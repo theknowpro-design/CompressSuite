@@ -1,0 +1,449 @@
+================================================================================
+COMPRESSSUITE — NUCLEAR TEST RESULTS
+Quick Reference: All Identified Breakpoints
+================================================================================
+
+EXECUTION STATUS: Analysis Complete
+FIXES APPLIED: None (as requested)
+LIVE TESTING: Ready on localhost:5174
+
+================================================================================
+CRITICAL ISSUES (Must Fix)
+================================================================================
+
+[CRITICAL] 3.1 — StrictMode Compression Deadlock (Dev Only)
+─────────────────────────────────────────────────────────
+Severity: CRITICAL (dev), LOW (prod)
+Likelihood: 100% in dev with StrictMode
+File: Results.jsx:30-40
+
+Issue:
+  React.StrictMode double-mounts Results component
+  startedKeyRef prevents compression from running on second mount
+  Compression UI hangs at "Compressing image…" forever
+  
+Root Cause:
+  if (startedKeyRef.current === runKey) return;  // SKIPS COMPRESSION
+  
+Occurs: Every file in npm run dev
+Impact: Breaks development/testing completely
+Test: npm run dev → upload any file → observe stuck "Compressing…"
+
+───────────────────────────────────────────────────────────────────────────
+
+[CRITICAL] 3.2 — Image Decompression Bomb (OOM/Hang)
+──────────────────────────────────────────────────────
+Severity: CRITICAL
+Likelihood: Low–Medium (crafted files)
+File: imageCompression.js:22-37
+
+Issue:
+  PNG with 30,000 × 30,000 pixel dimensions < 50 MB accepted
+  Canvas creation allocates 3.6 GB RAM
+  Tab crashes with OOM or hangs indefinitely
+  No dimension validation
+
+Root Cause:
+  const canvas = document.createElement('canvas');
+  canvas.width = image.width;  // NO GUARD
+  canvas.height = image.height;
+
+Test: Create PNG with extreme metadata dimensions
+Impact: Denial of Service / crash
+
+═══════════════════════════════════════════════════════════════════════════
+
+================================================================================
+HIGH-SEVERITY ISSUES (Fix Soon)
+================================================================================
+
+[HIGH] 3.3 — Image Load Timeout Missing
+────────────────────────────────────
+Severity: High
+Likelihood: Low
+File: imageCompression.js:16-66
+
+Issue:
+  Pathological image decoding stalls forever
+  Promise never resolves/rejects
+  "Compressing image…" shown indefinitely
+  No timeout, no abort
+
+Root Cause:
+  No Promise.race with timeout
+  Image.src assignment has no timeout guard
+
+Test: Craft image with slow decoder
+Mitigation: Add 5-second timeout
+
+───────────────────────────────────────────────────────────────────────────
+
+[HIGH] 3.4 — Empty FFmpeg Output Not Validated
+────────────────────────────────────────────────
+Severity: High
+Likelihood: Very Low
+File: videoCompression.js:40-43
+
+Issue:
+  FFmpeg produces 0-byte output in rare edge cases
+  Blob created from empty data
+  User sees "Success" and downloads empty video
+  No size validation
+
+Root Cause:
+  function blobFromFsData(fsData) {
+    return new Blob([new Uint8Array(fsData)], { type: "video/mp4" });
+    // NO CHECK FOR SIZE === 0
+  }
+
+Mitigation: Validate blob.size > 0 before success
+
+───────────────────────────────────────────────────────────────────────────
+
+[HIGH] 3.6 — FFmpeg CDN Dependency (Supply Chain)
+──────────────────────────────────────────────────
+Severity: High
+Likelihood: Low (outage), Very Low (compromise)
+File: videoCompression.js:17
+
+Issue:
+  FFmpeg.wasm loaded from jsDelivr CDN at runtime
+  No Subresource Integrity (SRI) check
+  CDN outage → video compression broken
+  Compromised CDN → code execution
+
+Root Cause:
+  FFmpeg({
+    corePath: "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.11.6/dist/"
+  })
+
+Test: Block cdn.jsdelivr.net → compress video
+Mitigation: Bundle locally or add SRI
+
+───────────────────────────────────────────────────────────────────────────
+
+[HIGH] 7.1 — Stale Compression Results Not Cleared
+────────────────────────────────────────────────────
+Severity: High
+Likelihood: Medium
+File: Results.jsx:30-34
+
+Issue:
+  Complete compression of file A
+  Navigate Home (but don't select new file)
+  Manually go to /results URL
+  Old compression result STILL SHOWS
+  Can download old file thinking it's new
+
+Root Cause:
+  Early return if no file doesn't reset prior compressionResult
+  if (!file || (type !== "image" && type !== "video")) {
+    setIsCompressing(false);
+    return;  // ← Leaves old state intact
+  }
+
+Test:
+  1. Compress file A
+  2. Go Home
+  3. Manually navigate /results → old result visible
+
+Mitigation: Clear all state when file is null
+
+───────────────────────────────────────────────────────────────────────────
+
+[HIGH] 8.1 — No Application Error Boundary
+────────────────────────────────────────────
+Severity: High
+Likelihood: Low
+File: App.jsx:8-21
+
+Issue:
+  Uncaught render error in any component
+  Blank screen or dev overlay
+  No user-facing error message
+  No recovery option
+
+Root Cause:
+  App.jsx has no ErrorBoundary wrapper
+  No errorElement on Router routes
+
+Test: Intentionally throw in Home.jsx render
+Mitigation: Add React Error Boundary
+
+───────────────────────────────────────────────────────────────────────────
+
+[HIGH] 4.1 — Clear Doesn't Reset fileTransfer Singleton
+─────────────────────────────────────────────────────────
+Severity: High
+Likelihood: Medium
+File: Home.jsx:78-84, fileTransfer.js
+
+Issue:
+  User compresses file A
+  Clicks Clear
+  React state resets
+  But fileTransfer singleton still holds old file
+  Navigate /results directly → old file re-appears
+  Compression may run again without user action
+
+Root Cause:
+  handleClearSelection doesn't null fileTransfer payload
+  Singleton persists for entire session
+
+Test:
+  1. Compress file A
+  2. Click Clear
+  3. Navigate /results (back button or URL)
+  4. File A may still be there
+
+Mitigation: Clear fileTransfer in handleClearSelection
+
+═══════════════════════════════════════════════════════════════════════════
+
+================================================================================
+MEDIUM-SEVERITY ISSUES (Fix in Next Pass)
+================================================================================
+
+[MEDIUM] 2.2 — Drag State Stuck (Cancel Without Drop)
+──────────────────────────────────────────────────────
+Severity: Medium
+Likelihood: Medium
+File: Home.jsx:45-62
+
+Issue:
+  Drag file over zone
+  Press Esc or drop outside browser
+  isDragging stays TRUE indefinitely
+  Zone remains highlighted
+  No dragend listener
+
+Root Cause:
+  dragCountRef reset only on drop/dragleave
+  No document dragend handler
+
+Test: Drag over zone → press Esc → zone stays highlighted
+Mitigation: Add dragend listener on document
+
+───────────────────────────────────────────────────────────────────────────
+
+[MEDIUM] 1.1 — Zero-Byte Files Not Guarded
+─────────────────────────────────────────────
+Severity: Medium
+Likelihood: Low
+File: validateFile.js:7-24
+
+Issue:
+  Upload 0-byte JPG or MP4
+  Home validation passes (no size === 0 check)
+  Results compression triggers
+  Image/FFmpeg rejects with generic error
+  User sees "corrupted" when file is just empty
+
+Root Cause:
+  if (file.size > LIMIT) { /* reject */ }
+  // No check for size === 0
+
+Test: createfile empty.jpg (0 bytes), upload it
+Mitigation: Add early check if (file.size === 0) reject "tooSmall"
+
+───────────────────────────────────────────────────────────────────────────
+
+[MEDIUM] 1.2 — Corrupted Image Data Accepted
+───────────────────────────────────────────────
+Severity: Medium
+Likelihood: Medium
+File: imageCompression.js:61-64
+
+Issue:
+  Truncated/corrupted JPEG/PNG passes validation
+  Image decoder may fail or produce garbage
+  Compression completes with blank/bad output
+  User sees "Success" with wrong result
+
+Root Cause:
+  No dimension validation after decode
+  canvas might be 0×0 or corrupt
+
+Mitigation: Validate image.width > 0 && height > 0
+
+───────────────────────────────────────────────────────────────────────────
+
+[MEDIUM] 1.6 — MIME Type Spoofing Not Detected
+──────────────────────────────────────────────────
+Severity: Medium
+Likelihood: Very Low
+File: supportedFormats.js:45-51
+
+Issue:
+  Video file with MIME "image/jpeg" detected as image
+  Routed to image pipeline
+  Fails in Image decoder
+  Generic error instead of "invalid file"
+
+Root Cause:
+  MIME checked first; extension fallback
+  No validation that content matches MIME
+
+Test: Programmatically create File(videoBytes, {type: "image/jpeg"})
+
+───────────────────────────────────────────────────────────────────────────
+
+[MEDIUM] 3.7 — No Compression Cancellation
+────────────────────────────────────────────
+Severity: Medium
+Likelihood: Medium
+File: videoCompression.js:45-88
+
+Issue:
+  Large video compression running (10+ seconds)
+  User navigates Home immediately
+  UI sets cancelled = true
+  But FFmpeg still running in background
+  CPU/memory used after navigation
+  Next compression waits in queue
+
+Mitigation: Implement AbortController for FFmpeg
+
+───────────────────────────────────────────────────────────────────────────
+
+[MEDIUM] 5.1 — localStorage Quota Exceeded (Silent Failure)
+─────────────────────────────────────────────────────────────
+Severity: Medium
+Likelihood: Low–Medium
+File: historyStore.js:49-53
+
+Issue:
+  localStorage filled (many compressions or other data)
+  Next compression's addHistoryEntry fails
+  Error caught but not shown to user
+  Compression appears successful
+  History list DOESN'T UPDATE until reload
+  User confused
+
+Root Cause:
+  try { setItem() } catch { /* returns but doesn't dispatch */ }
+
+Mitigation: Show user message when quota exceeded
+
+═══════════════════════════════════════════════════════════════════════════
+
+================================================================================
+LOW-SEVERITY ISSUES (Polish / Edge Cases)
+================================================================================
+
+[LOW] 2.1 — Drag Enter/Leave Flicker
+─────────────────────────────────
+Severity: Low
+Likelihood: Medium
+File: Home.jsx:45-57
+
+Issue:
+  Drag over zone, move between icon/text
+  Each child element fires dragenter/dragleave
+  Counter dips to 0 briefly
+  isDragging flickers false
+  Highlight momentarily disappears
+
+Mitigation: Use pointer-events on children or fixed counter
+
+───────────────────────────────────────────────────────────────────────────
+
+[LOW] 2.3 — Multiple Files Silently Truncated
+──────────────────────────────────────────────
+Severity: Low
+Likelihood: Medium
+
+Issue:
+  Drop 3 files at once
+  Only first processed
+  No feedback on extra files
+
+Mitigation: Show message "Only first file used"
+
+───────────────────────────────────────────────────────────────────────────
+
+[LOW] 4.2 — Continue Button Not Visually Disabled
+──────────────────────────────────────────────────
+Severity: Low
+Likelihood: Medium
+File: CompressionSlider.jsx:19
+
+Issue:
+  continuingRef guards against double-click
+  But button not disabled attribute
+  User clicks, perceives no response
+
+Mitigation: Add disabled={continuing} to button
+
+───────────────────────────────────────────────────────────────────────────
+
+[LOW] 6.2 — Rapid Theme Toggle Flicker
+──────────────────────────────────────
+Severity: Low
+Likelihood: Low
+
+Issue:
+  User spams Light/Dark toggle
+  0.2s transition mid-animation
+  Jarring but not broken
+
+Acceptable edge case.
+
+═══════════════════════════════════════════════════════════════════════════
+
+================================================================================
+SUMMARY STATISTICS
+================================================================================
+
+Total Breakpoints Found: 40+
+
+By Severity:
+  Critical:  2  (StrictMode deadlock, decompression bomb)
+  High:      5  (image timeout, empty output, CDN, stale results, error boundary)
+  Medium:    8  (drag stuck, zero-byte, corrupted, spoofing, cancellation, quota, etc.)
+  Low:       20+ (flicker, truncation, button disabled, toggle, filenames, etc.)
+
+By Category:
+  Compression Engine:  13
+  File Input:          10
+  Results Page:        4
+  Drop Zone:           4
+  Theme/UI:            3
+  History:             3
+  React Health:        3
+
+By Likelihood (Impact):
+  High:       4  (deadlock dev, stale payload, error boundary, drag stuck)
+  Medium:     10  (corrupted files, zero-byte, quota, multiple files, etc.)
+  Low:        15  (UI flicker, disabled button, long names, etc.)
+
+═══════════════════════════════════════════════════════════════════════════
+
+================================================================================
+TEST FILES PREPARED
+================================================================================
+
+Location: test-files/
+
+  zero-byte.jpg              — 0 bytes (tests size validation)
+  zero-byte.mp4              — 0 bytes (tests video validation)
+  corrupted.jpg              — Truncated JPEG header
+  fake-image.jpg             — Text file as JPG (MIME mismatch)
+  no-extension               — File with no extension
+  photo.backup.jpg           — Multi-dot filename
+  PHOTO.JPG                  — Uppercase extension
+  aaaa...aaa.jpg (200 chars) — Very long filename
+
+═══════════════════════════════════════════════════════════════════════════
+
+================================================================================
+READY FOR REMEDIATION
+================================================================================
+
+All issues identified without code changes.
+Awaiting user approval to begin fixes.
+
+Dev Server: http://localhost:5174 (running, ready for testing)
+Comprehensive Report: NUCLEAR_TEST_REPORT.md
+
+================================================================================
