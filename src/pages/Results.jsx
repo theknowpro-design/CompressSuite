@@ -26,7 +26,7 @@ function Results() {
   const [errorKey, setErrorKey] = useState(null);
   const [metadata, setMetadata] = useState({ width: null, height: null, duration: null });
   const [showDetails, setShowDetails] = useState(false);
-  const downloadTimeoutRef = useRef(null);
+  const downloadStateRef = useRef({ timeoutId: null, objectUrl: null });
 
   useEffect(() => {
     if (!file || (type !== "image" && type !== "video")) {
@@ -100,12 +100,14 @@ function Results() {
     };
   }, [compressionResult, type]);
 
-  // Cleanup download timeouts on unmount
+  // Cleanup download state on unmount — only clears timeout, doesn't revoke URLs
+  // to avoid aborting downloads in progress
   useEffect(() => {
     return () => {
-      if (downloadTimeoutRef.current) {
-        clearTimeout(downloadTimeoutRef.current);
+      if (downloadStateRef.current?.timeoutId) {
+        clearTimeout(downloadStateRef.current.timeoutId);
       }
+      downloadStateRef.current = { timeoutId: null, objectUrl: null };
     };
   }, []);
 
@@ -122,15 +124,26 @@ function Results() {
     link.click();
     link.remove();
     
-    // Clear any previous timeout before setting new one
-    if (downloadTimeoutRef.current) {
-      clearTimeout(downloadTimeoutRef.current);
+    // Clear any previous timeout and revoke its URL only after a delay
+    if (downloadStateRef.current?.timeoutId) {
+      clearTimeout(downloadStateRef.current.timeoutId);
+      const previousUrl = downloadStateRef.current.objectUrl;
+      
+      // Schedule revocation of the previous URL after a delay to prevent interference
+      // with the current download
+      window.setTimeout(() => {
+        URL.revokeObjectURL(previousUrl);
+      }, 2000);
     }
     
-    downloadTimeoutRef.current = window.setTimeout(() => {
+    // Schedule revocation of current URL
+    downloadStateRef.current.timeoutId = window.setTimeout(() => {
       URL.revokeObjectURL(objectUrl);
-      downloadTimeoutRef.current = null;
+      downloadStateRef.current = { timeoutId: null, objectUrl: null };
     }, 1000);
+    
+    // Track the current URL
+    downloadStateRef.current.objectUrl = objectUrl;
   }
 
   function handleCompressAnother() {
