@@ -1,0 +1,575 @@
+/* Footer Modal Overlay - Glass Morphism */
+.footer-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 18, 24, 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.footer-modal-overlay.active {
+  opacity: 1;
+}
+
+/* Footer Modal Container - Glass Morphism */
+.footer-modal-container {
+  width: 100%;
+  max-width: 720px;
+  max-height: 85vh;
+  background: rgba(255, 255, 255, 0.15);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  color: var(--text);
+  border-radius: 28px 28px 0 0;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.25);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: translateY(100%);
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+}
+
+.footer-modal-container.slide-up {
+  transform: translateY(0);
+}
+
+/* Dark Mode Glass Morphism */
+.footer-modal-container.dark-mode {
+  background: rgba(28, 32, 40, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+}
+
+.footer-modal-container.light-mode {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  color: #111;
+}
+
+/* Close Button - Glass Morphism */
+.footer-modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.15);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border-radius: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  transition: all 0.3s ease;
+  z-index: 10;
+  padding: 0;
+  font: inherit;
+}
+
+.footer-modal-close:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.08) rotate(90deg);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.footer-modal-close:active {
+  transform: scale(0.95);
+}
+
+.footer-modal-close svg {
+  stroke-width: 2;
+}
+
+/* Navigation Tabs */
+.footer-modal-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 0 30px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  scroll-snap-type: x mandatory;
+}
+
+/* Horizontal scroll styling */
+.footer-modal-tabs::-webkit-scrollbar {
+  height: 4px;
+}
+
+.footer-modal-tabs::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.footer-modal-tabs::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+}
+
+.footer-modal-tabs::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Firefox scrollbar */
+.footer-modal-tabs {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+/* Fade gradient indicator */
+.footer-modal-tabs::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 20px;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.15));
+  pointer-events: none;
+  border-radius: 0 0 0 8px;
+}
+
+.footer-modal-tab {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  padding: 12px 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  white-space: nowrap;
+  font: inherit;
+  flex-shrink: 0;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+}
+
+.footer-modal-tab:hover {
+  color: var(--text);
+}
+
+.footer-modal-tab.active {
+  color: var(--accent);
+}
+
+.footer-modal-tab.active::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent);
+}
+
+.light-mode .footer-modal-tab {
+  color: #333;
+}
+
+.light-mode .footer-modal-tab:hover {
+  color: #111;
+}
+
+.light-mode .footer-modal-tab.active {
+  color: #000;
+  border-bottom: 2px solid #000;
+}
+
+.light-mode .footer-modal-tab.active::after {
+  background: #000;
+}
+.footer-modal-header {
+  padding: 40px 30px 28px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.footer-modal-header h2 {
+  margin: 0 0 12px;
+  font-size: 2.2em;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--accent), var(--logo-accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.5px;
+}
+
+.footer-modal-tagline {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+/* Content - Glass Morphism */
+.footer-modal-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px 32px;
+  position: relative;
+}
+
+.footer-modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.footer-modal-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.footer-modal-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.footer-modal-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Scroll Progress Indicator */
+.footer-modal-progress-bar {
+  position: sticky;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--logo-accent));
+  transition: width 0.1s linear;
+  z-index: 11;
+  width: 0%;
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+
+/* Sections - Glass Morphism */
+.footer-modal-section {
+  margin-bottom: 28px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-modal-section:last-of-type {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+/* Section Header */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.section-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.section-icon {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  color: var(--accent);
+  flex-shrink: 0;
+  transition: color 0.2s ease;
+}
+
+.footer-modal-section:hover .section-icon {
+  color: var(--logo-accent);
+}
+
+/* Section Description */
+.section-description {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.section-body {
+  margin-top: 16px;
+}
+
+.section-paragraph {
+  margin: 0 0 16px;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+.section-paragraph:last-child {
+  margin-bottom: 0;
+}
+
+.active-section {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+/* Links - Glass Morphism */
+.footer-modal-section a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  margin-left: -12px;
+}
+
+.footer-modal-section a:hover {
+  color: var(--logo-accent);
+  background: rgba(255, 255, 255, 0.15);
+  padding-right: 16px;
+}
+
+.footer-modal-section a svg {
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: all 0.3s ease;
+}
+
+.footer-modal-section a:hover svg {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Contact Section - Glass Morphism */
+.footer-modal-contact {
+  background: rgba(255, 255, 255, 0.12);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  padding: 24px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-bottom: 0;
+  border-bottom: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.contact-details {
+  margin-top: 16px;
+}
+
+.contact-name {
+  margin: 0 0 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.contact-address {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.8;
+}
+
+.contact-email {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.contact-email a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.contact-email a:hover {
+  color: var(--logo-accent);
+  text-decoration: underline;
+}
+
+.contact-note {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  opacity: 0.8;
+}
+
+/* Copyright Section */
+.footer-modal-copyright-section {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 16px 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 24px 0 0;
+}
+
+.copyright-text {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  opacity: 0.85;
+  text-align: center;
+}
+
+/* Footer - Glass Morphism */
+.footer-modal-footer {
+  padding: 18px 30px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(8px);
+}
+
+.footer-modal-footer p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 640px) {
+  .footer-modal-container {
+    border-radius: 20px 20px 0 0;
+    max-height: 90vh;
+  }
+
+  .footer-modal-header {
+    padding: 32px 20px 20px;
+  }
+
+  .footer-modal-header h2 {
+    font-size: 1.7rem;
+  }
+
+  .footer-modal-content {
+    padding: 16px 20px;
+  }
+
+  .footer-modal-section {
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+  }
+
+  .section-header h3 {
+    font-size: 1.1rem;
+  }
+
+  .section-description {
+    font-size: 0.9rem;
+  }
+
+  .footer-modal-close {
+    top: 16px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .footer-modal-footer {
+    padding: 12px 20px;
+    font-size: 0.8rem;
+  }
+
+  .contact-details {
+    padding: 0;
+  }
+}
+
+@media (max-width: 360px) {
+  .footer-modal-container {
+    border-radius: 16px 16px 0 0;
+  }
+
+  .footer-modal-header {
+    padding: 24px 16px 16px;
+  }
+
+  .footer-modal-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .section-header {
+    gap: 8px;
+  }
+
+  .section-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .footer-modal-content {
+    padding: 12px 16px;
+  }
+
+  .footer-modal-section {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+  }
+
+  .section-header h3 {
+    font-size: 1rem;
+  }
+}
+
+/* Accessibility */
+.footer-modal-close:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.footer-modal-section a:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

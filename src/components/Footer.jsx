@@ -1,27 +1,58 @@
-function Footer() {
+function Footer({ onLinkClick }) {
   const currentYear = new Date().getFullYear();
 
   return (
     <footer className="app-footer">
       <nav className="footer-nav">
-        <a href="https://mindfulinternetp.com/affiliate-disclosure" target="_blank" rel="noopener noreferrer">
+        <button
+          className="footer-nav-button"
+          onClick={() => onLinkClick?.("about")}
+          aria-label="About CompressSuite"
+        >
+          About
+        </button>
+        <button
+          className="footer-nav-button"
+          onClick={() => onLinkClick?.("affiliate")}
+          aria-label="Affiliate Disclosure"
+        >
           Affiliate Disclosure
-        </a>
-        <a href="https://mindfulinternetp.com/privacy-policy" target="_blank" rel="noopener noreferrer">
+        </button>
+        <button
+          className="footer-nav-button"
+          onClick={() => onLinkClick?.("privacy")}
+          aria-label="Privacy Policy"
+        >
           Privacy Policy
-        </a>
-        <a href="https://mindfulinternetp.com/terms-of-use" target="_blank" rel="noopener noreferrer">
-          Terms of Use
-        </a>
-        <a href="https://mindfulinternetp.com/disclaimer" target="_blank" rel="noopener noreferrer">
+        </button>
+        <button
+          className="footer-nav-button"
+          onClick={() => onLinkClick?.("terms")}
+          aria-label="Terms of Service"
+        >
+          Terms of Service
+        </button>
+        <button
+          className="footer-nav-button"
+          onClick={() => onLinkClick?.("disclaimer")}
+          aria-label="Disclaimer"
+        >
           Disclaimer
-        </a>
-        <a href="https://mindfulinternetp.com/accessibility-statement" target="_blank" rel="noopener noreferrer">
-          Accessibility Statement
-        </a>
-        <a href="https://mindfulinternetp.com/contact" target="_blank" rel="noopener noreferrer">
+        </button>
+        <button
+          className="footer-nav-button"
+          onClick={() => onLinkClick?.("contact")}
+          aria-label="Contact Information"
+        >
           Contact
-        </a>
+        </button>
+        <button
+          className="footer-nav-button"
+          onClick={() => onLinkClick?.("copyright")}
+          aria-label="Copyright Information"
+        >
+          Copyright
+        </button>
       </nav>
       <p className="footer-copyright">
         © {currentYear}{" "}
