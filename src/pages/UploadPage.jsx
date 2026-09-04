@@ -1,33 +1,30 @@
 import { useCallback, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import CompressionSlider from "../components/CompressionSlider.jsx";
 import DropZone from "../components/DropZone.jsx";
 import ErrorBanner from "../components/ErrorBanner.jsx";
 import HistoryList from "../components/HistoryList.jsx";
+import { useApp } from "../context/AppContext.jsx";
 import { DEFAULT_COMPRESSION_LEVEL } from "../utils/compressionLevel";
-
 import { validateFile } from "../utils/validateFile";
 
-function Home() {
-  const fileInputRef = useRef(null);
+function UploadPage() {
+  const { setCompressionJob } = useApp();
   const navigate = useNavigate();
+  const location = useLocation();
+  const fileInputRef = useRef(null);
   const continuingRef = useRef(false);
+  const dragCountRef = useRef(0);
   const [selectedFile, setSelectedFile] = useState(null);
   const [detectedType, setDetectedType] = useState(null);
-  const [errorKey, setErrorKey] = useState(null);
+  const [errorKey, setErrorKey] = useState(location.state?.errorKey ?? null);
   const [isDragging, setIsDragging] = useState(false);
   const [compressionLevel, setCompressionLevel] = useState(DEFAULT_COMPRESSION_LEVEL);
-  const dragCountRef = useRef(0);
 
   function applyFile(file) {
-    if (!file) {
-      return;
-    }
-
+    if (!file) return;
     const { type, errorKey: nextError } = validateFile(file);
     continuingRef.current = false;
-    
-    // Ensure type is valid before proceeding
     const isValid = !nextError && type !== null;
     setErrorKey(nextError);
     setSelectedFile(isValid ? file : null);
@@ -54,9 +51,7 @@ function Home() {
   const handleDragLeave = useCallback((event) => {
     event.preventDefault();
     dragCountRef.current = Math.max(0, dragCountRef.current - 1);
-    if (dragCountRef.current === 0) {
-      setIsDragging(false);
-    }
+    if (dragCountRef.current === 0) setIsDragging(false);
   }, []);
 
   const handleDrop = useCallback((event) => {
@@ -78,9 +73,7 @@ function Home() {
   }, []);
 
   const handleZoneClick = useCallback((event) => {
-    if (!fileInputRef.current || event.target === fileInputRef.current) {
-      return;
-    }
+    if (!fileInputRef.current || event.target === fileInputRef.current) return;
     fileInputRef.current.click();
   }, []);
 
@@ -90,21 +83,13 @@ function Home() {
     setCompressionLevel(DEFAULT_COMPRESSION_LEVEL);
     setErrorKey(null);
     continuingRef.current = false;
-
   }
 
   function handleContinue() {
-    if (!selectedFile || continuingRef.current) {
-      return;
-    }
-
+    if (!selectedFile || continuingRef.current) return;
     continuingRef.current = true;
-    try {
-      navigate("/upload");
-    } catch {
-      continuingRef.current = false;
-      setErrorKey("compressionFailure");
-    }
+    setCompressionJob({ file: selectedFile, type: detectedType, compressionLevel });
+    navigate("/compressing");
   }
 
   return (
@@ -130,37 +115,10 @@ function Home() {
           onClear={handleClearSelection}
         />
       ) : null}
-      <div className="cta-section">
-        <a
-          className="btn-secondary store-front-link"
-          href="https://mindfulinternetp.gumroad.com"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          🛒 Explore the Mindful Internetpreneur Store Front
-        </a>
-        <a
-          className="btn-secondary pcloud-link"
-          href="https://partner.pcloud.com/r/157083"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          🎥📁 Store Your Media & Files Forever with pCloud Lifetime Storage
-        </a>
-        <a
-          className="btn-secondary operating-manual-link"
-          href="https://my-operating-manual-landing.vercel.app/"
-          target="_blank"
-          rel="noopener noreferrer"
-          title="See how you actually work for better collaboration."
-        >
-          📘 My Operating Manual
-        </a>
-      </div>
       <ErrorBanner errorKey={errorKey} />
       <HistoryList />
     </main>
   );
 }
 
-export default Home;
+export default UploadPage;

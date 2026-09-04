@@ -1,17 +1,24 @@
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { applyTheme, readTheme, writeTheme } from "../utils/theme";
 
 const AppContext = createContext(null);
 
 function getInitialTheme() {
   const theme = readTheme();
-  applyTheme(theme);
+  // ❌ REMOVED: applyTheme(theme) - must NOT mutate DOM during React initialization
   return theme;
 }
 
 export function AppProvider({ children }) {
   const [theme, setThemeState] = useState(getInitialTheme);
   const [isCompressing, setIsCompressing] = useState(false);
+  const [compressionJob, setCompressionJob] = useState(null);
+  const [compressionResult, setCompressionResult] = useState(null);
+
+  // ✅ Apply theme after React hydration completes
+  useEffect(() => {
+    applyTheme(theme);
+  }, [theme]);
 
   const setTheme = useCallback((nextTheme) => {
     applyTheme(nextTheme);
@@ -35,8 +42,22 @@ export function AppProvider({ children }) {
       toggleTheme,
       isCompressing,
       setIsCompressing,
+      compressionJob,
+      setCompressionJob,
+      compressionResult,
+      setCompressionResult,
     }),
-    [theme, setTheme, toggleTheme, isCompressing, setIsCompressing]
+    [
+      theme,
+      setTheme,
+      toggleTheme,
+      isCompressing,
+      setIsCompressing,
+      compressionJob,
+      setCompressionJob,
+      compressionResult,
+      setCompressionResult,
+    ]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

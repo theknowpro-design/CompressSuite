@@ -1,58 +1,72 @@
-function Footer({ onLinkClick }) {
+function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
     <footer className="app-footer">
       <nav className="footer-nav">
-        <button
+        <a
           className="footer-nav-button"
-          onClick={() => onLinkClick?.("about")}
+          href="/about"
+          target="_blank"
+          rel="noopener noreferrer"
           aria-label="About CompressSuite"
         >
           About
-        </button>
-        <button
+        </a>
+        <a
           className="footer-nav-button"
-          onClick={() => onLinkClick?.("affiliate")}
+          href="/affiliate"
+          target="_blank"
+          rel="noopener noreferrer"
           aria-label="Affiliate Disclosure"
         >
           Affiliate Disclosure
-        </button>
-        <button
+        </a>
+        <a
           className="footer-nav-button"
-          onClick={() => onLinkClick?.("privacy")}
+          href="/privacy"
+          target="_blank"
+          rel="noopener noreferrer"
           aria-label="Privacy Policy"
         >
           Privacy Policy
-        </button>
-        <button
+        </a>
+        <a
           className="footer-nav-button"
-          onClick={() => onLinkClick?.("terms")}
+          href="/terms"
+          target="_blank"
+          rel="noopener noreferrer"
           aria-label="Terms of Service"
         >
           Terms of Service
-        </button>
-        <button
+        </a>
+        <a
           className="footer-nav-button"
-          onClick={() => onLinkClick?.("disclaimer")}
+          href="/disclaimer"
+          target="_blank"
+          rel="noopener noreferrer"
           aria-label="Disclaimer"
         >
           Disclaimer
-        </button>
-        <button
+        </a>
+        <a
           className="footer-nav-button"
-          onClick={() => onLinkClick?.("contact")}
+          href="/contact"
+          target="_blank"
+          rel="noopener noreferrer"
           aria-label="Contact Information"
         >
           Contact
-        </button>
-        <button
+        </a>
+        <a
           className="footer-nav-button"
-          onClick={() => onLinkClick?.("copyright")}
+          href="/copyright"
+          target="_blank"
+          rel="noopener noreferrer"
           aria-label="Copyright Information"
         >
           Copyright
-        </button>
+        </a>
       </nav>
       <p className="footer-copyright">
         © {currentYear}{" "}

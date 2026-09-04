@@ -607,7 +607,8 @@ button:disabled:hover {
   margin-top: 16px;
 }
 
-.modal-overlay {
+/* ❌ DEPRECATED: Modal.jsx is no longer used - use FooterModal instead */
+/* .modal-overlay {
   position: fixed;
   inset: 0;
   background: var(--overlay);
@@ -615,7 +616,7 @@ button:disabled:hover {
   align-items: center;
   justify-content: center;
   animation: fade-in 0.2s ease;
-}
+} */
 
 .modal-card {
   background-color: var(--card);
@@ -987,7 +988,7 @@ button:disabled:hover {
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  z-index: 1000;
+  z-index: 100;
   transition: all 0.2s ease;
   box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
   font-family: system-ui, -apple-system, Segoe UI, sans-serif;

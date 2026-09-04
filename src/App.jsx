@@ -1,29 +1,25 @@
 import { useState, useEffect } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
 import { FiArrowUp } from "react-icons/fi";
-import { AppProvider, useApp } from "./context/AppContext.jsx";
+import { AppProvider } from "./context/AppContext.jsx";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
 import FaqSection from "./components/FaqSection.jsx";
 import Footer from "./components/Footer.jsx";
-import FooterModal from "./components/FooterModal.jsx";
 import Header from "./components/Header.jsx";
-import Home from "./pages/Home.jsx";
+
 import Results from "./pages/Results.jsx";
+import Compressing from "./pages/Compressing.jsx";
+import UploadPage from "./pages/UploadPage.jsx";
+import About from "./pages/About.jsx";
+import Affiliate from "./pages/Affiliate.jsx";
+import Privacy from "./pages/Privacy.jsx";
+import Terms from "./pages/Terms.jsx";
+import Disclaimer from "./pages/Disclaimer.jsx";
+import Contact from "./pages/Contact.jsx";
+import Copyright from "./pages/Copyright.jsx";
 
 function AppContent() {
-  const { theme } = useApp();
-  const [showFooterModal, setShowFooterModal] = useState(false);
-  const [activeSection, setActiveSection] = useState("about");
   const [showScrollTop, setShowScrollTop] = useState(false);
-
-  const handleOpenModal = (section = "about") => {
-    setActiveSection(section);
-    setShowFooterModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setShowFooterModal(false);
-  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -45,11 +41,20 @@ function AppContent() {
     <>
       <Header />
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Navigate to="/upload" replace />} />
+        <Route path="/upload" element={<UploadPage />} />
+        <Route path="/compressing" element={<Compressing />} />
         <Route path="/results" element={<Results />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/affiliate" element={<Affiliate />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/disclaimer" element={<Disclaimer />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/copyright" element={<Copyright />} />
       </Routes>
       <FaqSection />
-      <Footer onLinkClick={handleOpenModal} />
+      <Footer />
 
       {/* Scroll-to-Top Button - Fixed bottom-right */}
       {showScrollTop && (
@@ -62,15 +67,6 @@ function AppContent() {
           <FiArrowUp size={20} />
         </button>
       )}
-
-      {/* Footer Modal */}
-      <FooterModal
-        isOpen={showFooterModal}
-        onClose={handleCloseModal}
-        darkMode={theme === "dark"}
-        activeSection={activeSection}
-        onSectionChange={setActiveSection}
-      />
     </>
   );
 }

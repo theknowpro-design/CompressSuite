@@ -20,7 +20,10 @@ function CompressionSlider({ value, onChange, onContinue, onClear }) {
       </p>
       <div className="compression-slider__actions" style={{ display: "flex", gap: "12px", marginTop: "16px" }}>
         {onContinue ? (
-          <button type="button" className="compression-slider__continue" onClick={onContinue}>
+          <button type="button" className="compression-slider__continue" onClick={() => {
+            console.log("COMPRESS CLICKED");
+            onContinue();
+          }}>
             Continue
           </button>
         ) : null}
